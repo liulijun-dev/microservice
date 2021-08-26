@@ -92,13 +92,67 @@ DDD是一种**针对大型复杂系统的领域建模与分析方法**，它是�
 
 在上下文映射中需要特别注意**循环依赖、双向依赖和过长的依赖**，如果出现这几种依赖关系，需要思考限界上下文分解的是否合理。
 
-# 战术建模工具
+# 2. 战术设计
 
+## 2.1 实体
 
+**实体是具有唯一身份标识的对象。**
 
-# 1. 实体
+实体的特征：
 
-# 2. 值对象
+- 具有唯一身份标识并且在实体的生命周期内保持不变
+- 可变性
+- 具有相同身份标识的两个实体是相同的对象
+
+```java
+//实体
+public class Product extends Entity {
+  //实体的身份标识为一个值对象
+  private ProductId productId;
+  ...
+    
+  public Product(ProductId productId) {
+    this.setProductId(productId);
+  }
+    
+  public Date creationDate() {
+    this.productId().creationDate();
+  }
+  
+  //省略setter和getter
+}
+
+//值对像
+public class ProductId extends ValueObject{
+  private static final SimpleDateFormat DEFAULT_DATE_FORMATTER = new SimpleDateFormat("yyyyMMdd");;
+  private String productId;
+  
+  public ProductId(UUID uuid) {
+    this.productId = "APM-P-" + DEFAULT_DATE_FORMATTER.format(new Date()) + "-" + uuid.substring(0,10)
+  }
+  
+  public Date creationDate() {
+    return DEFAULT_DATE_FORMATTER.parse(this.productId.split("-")[2]);
+  }
+}
+
+//获取ProductId
+public interface ProductRepository {
+  default ProductId nextId() {
+    return new ProductId(UUID.randomUUID());
+  }
+```
+
+## 2.2 值对象
+
+**值对象表示属性集合的对象。**
+
+值对象的特点：
+
+- 一般没有身份标识
+- 不可变（只能整体更新，实际上是替换成了一个新的值对象实例）
+- 具有相同属性值的两个值对象可以互换使用
+- 没有实体复杂
 
 # 3. 工厂
 
